@@ -101,9 +101,12 @@ Drawing.new = function(Type)
                     LineFrame.BackgroundColor3 = Value
                     LineProperties.Color = Value 
                 end
+                if (Property == "ZIndex") then
+                    LineFrame.ZIndex = Value
+                end
             end),
             __index = (function(self, Property)
-                if (Property == "Remove") then
+                if (string.lower(tostring(Property)) == "remove") then
                     return (function()
                         LineFrame:Destroy();
                     end)
@@ -163,9 +166,12 @@ Drawing.new = function(Type)
                     CircleFrame.Visible = Value
                     CircleProperties.Visible = Value
                 end
+                if (Property == "ZIndex") then
+                    CircleFrame.ZIndex = Value
+                end
             end),
             __index = (function(self, Property)
-                if (Property == "Remove") then
+                if (string.lower(tostring(Property)) == "remove") then
                     return (function()
                         CircleFrame:Destroy();
                     end)
@@ -231,9 +237,12 @@ Drawing.new = function(Type)
                     TextLabel.Position = Value == true and UDim2.new(0, Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2, 0)
                     TextProperties.Center = Value
                 end
+                if (Property == "ZIndex") then
+                    TextLabel.ZIndex = Value
+                end
             end),
             __index = (function(self, Property)
-                if (Property == "Remove") then
+                if (string.lower(tostring(Property)) == "remove") then
                     return (function()
                         TextLabel:Destroy();
                     end)
@@ -297,9 +306,12 @@ Drawing.new = function(Type)
                     Stroke.Enabled = not Value
                     SquareProperties.Filled = Value
                 end
+                if (Property == "ZIndex") then
+                    SquareFrame.ZIndex = Value
+                end
             end),
             __index = (function(self, Property)
-                if (Property == "Remove") then
+                if (string.lower(tostring(Property)) == "remove") then
                     return (function()
                         SquareFrame:Destroy();
                     end)
@@ -358,9 +370,12 @@ Drawing.new = function(Type)
                     ImageLabel.Image = Value
                     ImageProperties.Data = Value
                 end
+                if (Property == "ZIndex") then
+                    ImageLabel.ZIndex = Value
+                end
             end),
             __index = (function(self, Property)
-                if (Property == "Remove") then
+                if (string.lower(tostring(Property)) == "remove") then
                     return (function()
                         ImageLabel:Destroy();
                     end)
@@ -414,9 +429,15 @@ Drawing.new = function(Type)
                 if Property == "Filled" then
                      -- i'll do this later
                 end
+                if (Property == "ZIndex") then
+                    PointA.ZIndex = Value
+                    PointB.ZIndex = Value
+                    PointC.ZIndex = Value
+                    PointD.ZIndex = Value
+                end
             end),
             __index = (function(self, Property)
-                if (Property == "Remove") then
+                if (string.lower(tostring(Property)) == "remove") then
                     return (function()
                         PointA:Remove();
                         PointB:Remove();
@@ -467,9 +488,14 @@ Drawing.new = function(Type)
                 if Property == "Filled" then
                      -- i'll do this later
                 end
+                if (Property == "ZIndex") then
+                    PointA.ZIndex = Value
+                    PointB.ZIndex = Value
+                    PointC.ZIndex = Value
+                end
             end),
             __index = (function(self, Property)
-                if (Property == "Remove") then
+                if (string.lower(tostring(Property)) == "remove") then
                     return (function()
                         PointA:Remove();
                         PointB:Remove();
