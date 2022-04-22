@@ -1,13 +1,8 @@
 local Drawing = {}
 
-local game = game
-local GetService, FindFirstChild = game.GetService, game.FindFirstChild
-local IsA = game.IsA
-local Vector2new, Instancenew, UDim2new = Vector2.new, Instance.new, UDim2.new
-
-local Workspace = GetService(game, "Workspace");
-local Camera = FindFirstChild(Workspace, "Camera");
-local CoreGui = GetService(game, "CoreGui");
+local Workspace = game:GetService("Workspace");
+local Camera = Workspace:FindFirstChild("Camera");
+local CoreGui = game:GetService("CoreGui");
 
 local BaseDrawingProperties = setmetatable({
     Visible = false,
@@ -28,18 +23,24 @@ local BaseDrawingProperties = setmetatable({
     end
 })
 
-Drawing.new = function(Type, UI)
-    UI = UI and IsA(UI, "ScreenGui") and UI or Instancenew("ScreenGui", CoreGui) or Instancenew("ScreenGui", CoreGui);
+local DRAWING_UI = nil;
+
+Drawing.new = function(Type)
+    if DRAWING_UI == nil then
+        DRAWING_UI = Instance.new("ScreenGui");
+        DRAWING_UI.Parent = CoreGui;
+        DRAWING_UI.Name = "DrawingLib"
+    end
 
     if (Type == "Line") then
         local LineProperties = ({
-            To = Vector2new(),
-            From = Vector2new(),
+            To = Vector2.new(),
+            From = Vector2.new(),
             Thickness = 1,
         } + BaseDrawingProperties)
 
-        local LineFrame = Instancenew("Frame");
-        LineFrame.AnchorPoint = Vector2new(0.5, 0.5);
+        local LineFrame = Instance.new("Frame");
+        LineFrame.AnchorPoint = Vector2.new(0.5, 0.5);
         LineFrame.BorderSizePixel = 0
 
         LineFrame.BackgroundColor3 = LineProperties.Color
@@ -47,7 +48,7 @@ Drawing.new = function(Type, UI)
         LineFrame.BackgroundTransparency = LineProperties.Transparency
 
 
-        LineFrame.Parent = UI
+        LineFrame.Parent = DRAWING_UI
 
         return setmetatable({}, {
             __newindex = (function(self, Property, Value)
@@ -116,48 +117,51 @@ Drawing.new = function(Type, UI)
         local CircleProperties = ({
             Radius = 150,
             Filled = false,
-            Position = Vector2new()
+            Position = Vector2.new()
         } + BaseDrawingProperties)
 
-        local CircleFrame = Instancenew("Frame");
+        local CircleFrame = Instance.new("Frame");
 
-        CircleFrame.AnchorPoint = Vector2new(0.5, 0.5);
+        CircleFrame.AnchorPoint = Vector2.new(0.5, 0.5);
         CircleFrame.BorderSizePixel = 0
 
         CircleFrame.BackgroundColor3 = CircleProperties.Color
         CircleFrame.Visible = CircleProperties.Visible
         CircleFrame.BackgroundTransparency = CircleProperties.Transparency
 
-        local Corner = Instancenew("UICorner", CircleFrame);
+        local Corner = Instance.new("UICorner", CircleFrame);
         Corner.CornerRadius = UDim.new(1, 0);
-        CircleFrame.Size = UDim2new(0, CircleProperties.Radius, 0, CircleProperties.Radius);
+        CircleFrame.Size = UDim2.new(0, CircleProperties.Radius, 0, CircleProperties.Radius);
 
-        CircleFrame.Parent = UI
+        CircleFrame.Parent = DRAWING_UI
+        
+        local Stroke = Instance.new("UIStroke", CircleFrame)
+        Stroke.Thickness = 2
+        Stroke.Enabled = false
 
         return setmetatable({}, {
             __newindex = (function(self, Property, Value)
                 if (Property == "Radius") then
-                    CircleFrame.Size = UDim2new(0, Value, 0, Value);
+                    CircleFrame.Size = UDim2.new(0, Value, 0, Value);
                     CircleProperties.Radius = Value
                 end
                 if (Property == "Position") then
-                    CircleFrame.Position = UDim2new(0, Value.X, 0, Value.Y);
+                    CircleFrame.Position = UDim2.new(0, Value.X, 0, Value.Y);
                     CircleProperties.Position = Value
                 end
                 if (Property == "Filled") then
-                    CircleFrame.BackgroundTransparency = Value == true and 0 or 0.8
+                    CircleFrame.BackgroundTransparency = Value == true and 0 or 1
+                    Stroke.Enabled = not Value
                     CircleProperties.Filled = Value
                 end
                 if (Property == "Color") then
                     CircleFrame.BackgroundColor3 = Value
+                    Stroke.Color = Value
                     CircleProperties.Color = Value
                 end
                 if (Property == "Visible") then
                     CircleFrame.Visible = Value
                     CircleProperties.Visible = Value
-                end
-                if (Property == "Transparency") then
-
                 end
             end),
             __index = (function(self, Property)
@@ -179,14 +183,14 @@ Drawing.new = function(Type, UI)
             Center = false,
             Outline = false,
             OutlineColor = Color3.new(),
-            Position = Vector2new(),
+            Position = Vector2.new(),
         } + BaseDrawingProperties)
 
-        local TextLabel = Instancenew("TextLabel");
+        local TextLabel = Instance.new("TextLabel");
 
-        TextLabel.AnchorPoint = Vector2new(0.5, 0.5);
+        TextLabel.AnchorPoint = Vector2.new(0.5, 0.5);
         TextLabel.BorderSizePixel = 0
-        TextLabel.Size = UDim2new(0, 200, 0, 50);
+        TextLabel.Size = UDim2.new(0, 200, 0, 50);
         TextLabel.Font = Enum.Font.SourceSans
         TextLabel.TextSize = 14
 
@@ -195,7 +199,7 @@ Drawing.new = function(Type, UI)
         TextLabel.BackgroundTransparency = 1
         TextLabel.TextTransparency = 1 - TextProperties.Transparency
         
-        TextLabel.Parent = UI
+        TextLabel.Parent = DRAWING_UI
 
         return setmetatable({}, {
             __newindex = (function(self, Property, Value)
@@ -204,7 +208,7 @@ Drawing.new = function(Type, UI)
                     TextProperties.Text = Value
                 end
                 if (Property == "Position") then
-                    TextLabel.Position = UDim2new(0, Value.X, 0, Value.Y);
+                    TextLabel.Position = UDim2.new(0, Value.X, 0, Value.Y);
                     TextProperties.Position = Value
                 end
                 if (Property == "Size") then
@@ -224,7 +228,7 @@ Drawing.new = function(Type, UI)
                     TextProperties.Visible = Value
                 end
                 if (Property == "Center") then
-                    TextLabel.Position = Value == true and UDim2new(0, Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2, 0)
+                    TextLabel.Position = Value == true and UDim2.new(0, Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2, 0)
                     TextProperties.Center = Value
                 end
             end),
@@ -243,47 +247,55 @@ Drawing.new = function(Type, UI)
     if (Type == "Square") then
         local SquareProperties = ({
             Thickness = 1,
-            Size = Vector2new(),
-            Position = Vector2new(),
+            Size = Vector2.new(),
+            Position = Vector2.new(),
             Filled = false,
         } + BaseDrawingProperties);
 
-        local SquareFrame = Instancenew("Frame");
+        local SquareFrame = Instance.new("Frame");
         
-        SquareFrame.AnchorPoint = Vector2new(0.5, 0.5);
+        SquareFrame.AnchorPoint = Vector2.new(0.5, 0.5);
         SquareFrame.BorderSizePixel = 0
 
         SquareFrame.Visible = false
-        SquareFrame.Parent = UI
+        SquareFrame.Parent = DRAWING_UI
+        
+        local Stroke = Instance.new("UIStroke", SquareFrame)
+        Stroke.Thickness = 2
+        Stroke.Enabled = false
+        Stroke.LineJoinMode = Enum.LineJoinMode.Milter
 
         return setmetatable({}, {
             __newindex = (function(self, Property, Value)
                 if (Property == "Size") then
-                    SquareFrame.Size = UDim2new(0, Value.X, 0, Value.Y);
+                    SquareFrame.Size = UDim2.new(0, Value.X, 0, Value.Y);
                     SquareProperties.Text = Value
                 end
                 if (Property == "Position") then
-                    SquareFrame.Position = UDim2new(0, Value.X, 0, Value.Y);
+                    SquareFrame.Position = UDim2.new(0, Value.X, 0, Value.Y);
                     SquareProperties.Position = Value
                 end
                 if (Property == "Size") then
-                    SquareFrame.Size = UDim2new(0, Value.X, 0, Value.Y);
+                    SquareFrame.Size = UDim2.new(0, Value.X, 0, Value.Y);
                     SquareProperties.Size = Value
                 end
                 if (Property == "Color") then
                     SquareFrame.BackgroundColor3 = Value
+                    Stroke.Color = Value
                     SquareProperties.Color = Value
                 end
                 if (Property == "Transparency") then
-                    SquareFrame.BackgroundTransparency = 1 - Value
+                    SquareFrame.BackgroundTransparency = Value
                     SquareProperties.Transparency = Value
                 end
                 if (Property == "Visible") then
                     SquareFrame.Visible = Value
                     SquareProperties.Visible = Value
                 end
-                if (Property == "Filed") then -- requires beta
-
+                if (Property == "Filled") then -- requires beta
+                    SquareFrame.BackgroundTransparency = (Value == true and 0 or 1)
+                    Stroke.Enabled = not Value
+                    SquareProperties.Filled = Value
                 end
             end),
             __index = (function(self, Property)
@@ -301,33 +313,33 @@ Drawing.new = function(Type, UI)
     if (Type == "Image") then
         local ImageProperties = ({
             Data = "rbxassetid://848623155", -- roblox assets only rn
-            Size = Vector2new(),
-            Position = Vector2new(),
+            Size = Vector2.new(),
+            Position = Vector2.new(),
             Rounding = 0,
         });
 
-        local ImageLabel = Instancenew("ImageLabel");
+        local ImageLabel = Instance.new("ImageLabel");
 
-        ImageLabel.AnchorPoint = Vector2new(0.5, 0.5);
+        ImageLabel.AnchorPoint = Vector2.new(0.5, 0.5);
         ImageLabel.BorderSizePixel = 0
         ImageLabel.ScaleType = Enum.ScaleType.Stretch
         ImageLabel.Transparency = 1
         
         ImageLabel.Visible = false
-        ImageLabel.Parent = UI
+        ImageLabel.Parent = DRAWING_UI
 
         return setmetatable({}, {
             __newindex = (function(self, Property, Value)
                 if (Property == "Size") then
-                    ImageLabel.Size = UDim2new(0, Value.X, 0, Value.Y);
+                    ImageLabel.Size = UDim2.new(0, Value.X, 0, Value.Y);
                     ImageProperties.Text = Value
                 end
                 if (Property == "Position") then
-                    ImageLabel.Position = UDim2new(0, Value.X, 0, Value.Y);
+                    ImageLabel.Position = UDim2.new(0, Value.X, 0, Value.Y);
                     ImageProperties.Position = Value
                 end
                 if (Property == "Size") then
-                    ImageLabel.Size = UDim2new(0, Value.X, 0, Value.Y);
+                    ImageLabel.Size = UDim2.new(0, Value.X, 0, Value.Y);
                     ImageProperties.Size = Value
                 end
                 if (Property == "Transparency") then
@@ -354,17 +366,121 @@ Drawing.new = function(Type, UI)
                     end)
                 end
                 
-                return ImageLabel[Property]
+                return ImageProperties[Property]
             end)
         })
     end
 
 
     if (Type == "Quad") then -- will add later
+        local QuadProperties = ({
+            Thickness = 1,
+            PointA = Vector2.new();
+            PointB = Vector2.new();
+            PointC = Vector2.new();
+            PointD = Vector2.new();
+            Filled = false;
+        }  + BaseDrawingProperties);
+
+        local PointA = Drawing.new("Line")
+        local PointB = Drawing.new("Line")
+        local PointC = Drawing.new("Line")
+        local PointD = Drawing.new("Line")
+
         return setmetatable({}, {
-            
+            __newindex = (function(self, Property, Value)
+                if Property == "Thickness" then
+                    PointA.Thickness = Value
+                    PointB.Thickness = Value
+                    PointC.Thickness = Value
+                    PointD.Thickness = Value
+                end
+                if Property == "PointA" then
+                    PointA.From = Value
+                    PointB.To = Value
+                end
+                if Property == "PointB" then
+                    PointB.From = Value
+                    PointC.To = Value
+                end
+                if Property == "PointC" then
+                    PointC.From = Value
+                    PointD.To = Value
+                end
+                if Property == "PointD" then
+                    PointD.From = Value
+                    PointA.To = Value
+                end
+                if Property == "Filled" then
+                     -- i'll do this later
+                end
+            end),
+            __index = (function(self, Property)
+                if (Property == "Remove") then
+                    return (function()
+                        PointA:Remove();
+                        PointB:Remove();
+                        PointC:Remove();
+                        PointD:Remove();
+                    end)
+                end
+                
+                return QuadProperties[Property]
+            end)
+        });
+    end
+    if (Type == "Triangle") then
+        local TriangleProperties = ({
+            Thickness = 1,
+            PointA = Vector2.new();
+            PointB = Vector2.new();
+            PointC = Vector2.new();
+            Filled = false;
+        }  + BaseDrawingProperties);
+
+        local PointA = Drawing.new("Line")
+        local PointB = Drawing.new("Line")
+        local PointC = Drawing.new("Line")
+
+        return setmetatable({}, {
+            __newindex = (function(self, Property, Value)
+                if Property == "Thickness" then
+                    PointA.Thickness = Value
+                    PointB.Thickness = Value
+                    PointC.Thickness = Value
+                end
+                if Property == "PointA" then
+                    PointA.From = Value
+                    PointB.To = Value
+                    TriangleProperties.PointA = Value
+                end
+                if Property == "PointB" then
+                    PointB.From = Value
+                    PointC.To = Value
+                    TriangleProperties.PointB = Value
+                end
+                if Property == "PointC" then
+                    PointC.From = Value
+                    PointA.To = Value
+                    TriangleProperties.PointC = Value
+                end
+                if Property == "Filled" then
+                     -- i'll do this later
+                end
+            end),
+            __index = (function(self, Property)
+                if (Property == "Remove") then
+                    return (function()
+                        PointA:Remove();
+                        PointB:Remove();
+                        PointC:Remove();
+                    end)
+                end
+                
+                return TriangleProperties[Property]
+            end)
         });
     end
 end
 
-return Drawing
+getgenv()["Drawing"] = Drawing
