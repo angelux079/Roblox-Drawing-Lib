@@ -272,7 +272,7 @@ Drawing.new = function(Type)
         local Stroke = Instance.new("UIStroke", SquareFrame)
         Stroke.Thickness = 2
         Stroke.Enabled = false
-        Stroke.LineJoinMode = Enum.LineJoinMode.Milter
+        Stroke.LineJoinMode = Enum.LineJoinMode.Miter
 
         return setmetatable({}, {
             __newindex = (function(self, Property, Value)
